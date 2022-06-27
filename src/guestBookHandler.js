@@ -24,6 +24,7 @@ const handleGuestBook = ({ queryParams }, response) => {
     comments.push({ name, comment, date: timeStamp() });
   }
   const commentsHtml = generateCommentsHtml(comments);
+  fs.writeFileSync('./comments.json', JSON.stringify(comments));
   const template = rawTemplate.replace('__COMMENTS__', commentsHtml);
   response.send(template);
 };

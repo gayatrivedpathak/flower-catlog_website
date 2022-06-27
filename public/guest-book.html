@@ -1,4 +1,30 @@
 <html>
-<title>Guest Book</title>
+
+<head>
+  <title>Guest Book</title>
+  <link rel="stylesheet" href="css/style.css ">
+</head>
+
+<body>
+  <header>
+    <a href="index.html">
+      << </a>
+        <h1>Guest Book</h1>
+  </header>
+  <main class="content-area">
+    <form action="/guest-book" method="get" class="guest-book">
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" name="name">
+      </div>
+      <div>
+        <label for="comment">Comment:</label>
+        <textarea name="comment"></textarea>
+      </div>
+      <input type="submit" value="submit">
+    </form>
+  </main>
+  <div class="comments">__COMMENTS__</div>
+</body>
 
 </html>

@@ -1,9 +1,11 @@
 const { createServer } = require('net');
+const { guestBookHandler } = require('./guestBookHandler.js');
 const { parseRequest } = require('./parseRequest.js');
 const { Response } = require('./response.js');
 const { serveFileContent } = require('./serveFileContent.js');
 
-const handlers = [serveFileContent];
+
+const handlers = [serveFileContent, guestBookHandler];
 
 const handle = (request, response, rootDir) => {
   for (const handler of handlers) {

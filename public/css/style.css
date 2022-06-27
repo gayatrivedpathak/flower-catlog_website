@@ -9,9 +9,12 @@ header {
   justify-content: center;
   border-bottom: 1px solid black;
   padding: 0.5em;
-  font-size: 1.5em;
   color: coral;
   column-gap: 1em;
+}
+
+header>h1 {
+  font-size: 2em;
   font-weight: 900;
 }
 

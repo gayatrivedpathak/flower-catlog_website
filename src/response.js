@@ -40,7 +40,7 @@ class Response {
   }
 
   send(body) {
-    this.addHeader('content-length:', body.length);
+    this.addHeader('Content-length', body.length);
     this.write(this.#statusLine());
     this.#writeHeaders();
     this.write(EOL);

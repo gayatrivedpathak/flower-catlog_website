@@ -1,23 +1,25 @@
 const fs = require('fs');
+const path = require('path');
 
-const serveFileContent = ({ uri }, response, rootDir) => {
-  if (!rootDir) {
-    rootDir = './public';
-  }
+const getMimeType = (extension) => {
+  const mimeTypes = { '.html': 'text/html', '.jpg': 'image/jpeg' };
+  return mimeTypes[extension];
+};
 
+const createServeFileContent = (rootDir) => ({ uri }, response) => {
   if (uri === '/') {
     uri = '/index.html';
   }
-
-  let fileName = rootDir + uri;
-  console.log(fileName);
-  if (!fs.existsSync(fileName)) {
+  const fileName = path.join(rootDir, uri);
+  try {
+    const fileContent = fs.readFileSync(fileName);
+    const extension = path.extname(fileName);
+    response.addHeader('content-type', getMimeType(extension));
+    response.send(fileContent);
+  } catch (err) {
     return false;
   }
-
-  const fileContent = fs.readFileSync(fileName);
-  response.send(fileContent);
   return true;
 };
 
-module.exports = { serveFileContent };
+module.exports = { createServeFileContent };

@@ -1,6 +1,7 @@
 # TODO
 
-- [ ] Add the styles to the comments table
+- [ ] Add styles to the comments table 
+- [ ] 
 
 # DONE
 

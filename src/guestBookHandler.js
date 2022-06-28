@@ -38,6 +38,7 @@ const handleGuestBook = ({ queryParams }, response) => {
   const commentsHtml = generateCommentsHtml(comments);
   const template = rawTemplate.replace('__COMMENTS__', commentsHtml);
   response.send(template);
+  return true;
 };
 
 const guestBookHandler = (request, response) => {

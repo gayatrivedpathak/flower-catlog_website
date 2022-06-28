@@ -1,20 +1,6 @@
 const { createServer } = require('net');
-const { guestBookHandler } = require('./guestBookHandler.js');
 const { parseRequest } = require('./parseRequest.js');
 const { Response } = require('./response.js');
-const { serveFileContent } = require('./serveFileContent.js');
-
-
-const handlers = [serveFileContent, guestBookHandler];
-
-const handle = (request, response, rootDir) => {
-  for (const handler of handlers) {
-    if (handler(request, response, rootDir)) {
-      return true;
-    }
-  }
-  return false;
-};
 
 const onNewConnection = (socket, handler, rootDir) => {
   socket.on('error', (err) => console.error(err.message));
@@ -36,4 +22,4 @@ const startServer = (handler, rootDir) => {
   server.listen(PORT, () => console.log(`listening on ${PORT}`));
 };
 
-module.exports = { onNewConnection, handle, startServer };
+module.exports = { onNewConnection, startServer };

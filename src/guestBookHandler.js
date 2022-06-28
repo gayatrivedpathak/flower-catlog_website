@@ -4,14 +4,22 @@ const timeStamp = () => {
   return new Date().toString();
 };
 
+const toHtml = ({ name, comment, date }) => {
+  const nameHtml = `<td>${name}</td>`;
+  const commentHtml = `<td>${comment}</td>`;
+  const dateHtml = `<td>${date}</td>`;
+  return `<tr>${dateHtml}${nameHtml}${commentHtml}</tr>`;
+};
+
 const generateCommentsHtml = (comments) => {
   if (!comments.length) {
     return '';
   }
-  return JSON.stringify(comments);
+  const commentsHtml = comments.reverse().map(toHtml).join('');
+  return `<table>${commentsHtml}</table>`
 };
 
-const getOldComment = () => {
+const getOldComments = () => {
   const comments = fs.readFileSync('./comments.json', 'utf-8')
   return comments.length ? JSON.parse(comments) : [];
 };
@@ -19,12 +27,12 @@ const getOldComment = () => {
 const handleGuestBook = ({ queryParams }, response) => {
   const { name, comment } = queryParams;
   const rawTemplate = fs.readFileSync('./public/guest-book.html', 'utf-8');
-  const comments = getOldComment();
+  const comments = getOldComments();
   if (name && comment) {
     comments.push({ name, comment, date: timeStamp() });
+    fs.writeFileSync('./comments.json', JSON.stringify(comments));
   }
   const commentsHtml = generateCommentsHtml(comments);
-  fs.writeFileSync('./comments.json', JSON.stringify(comments));
   const template = rawTemplate.replace('__COMMENTS__', commentsHtml);
   response.send(template);
 };

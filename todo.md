@@ -1,9 +1,12 @@
 # TODO
 
-- [ ] create guest book for taking comments
+- [ ] parse comment for the newline character
+- [ ] Change the date and time format of comments
+- [ ]
 
 # DONE
 
+- [x] create guest book for taking comments
 - [x] Add the styles for the page
 - [x] Add download option for the flower documents
 - [x] create the page for agerantum

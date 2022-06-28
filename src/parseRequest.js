@@ -1,5 +1,9 @@
-const parseValue = (value) => {
-  return value.replaceAll('+', ' ');
+const parseValue = (rawValue) => {
+  const decodingKeys = { '+': ' ', '%0D': '\r', '%0A': '\n' };
+
+  return Object.entries(decodingKeys).reduce((value, [from, to]) => {
+    return value.replaceAll(from, to);
+  }, rawValue);
 };
 
 const parseUri = (rawUri) => {

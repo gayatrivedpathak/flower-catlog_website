@@ -1,7 +1,10 @@
 const fs = require('fs');
 
 const timeStamp = () => {
-  return new Date().toString();
+  const d = new Date();
+  const date = d.toDateString();
+  const time = d.toLocaleTimeString();
+  return `${date} ${time}`;
 };
 
 const toHtml = ({ name, comment, date }) => {
@@ -16,7 +19,7 @@ const generateCommentsHtml = (comments) => {
     return '';
   }
   const commentsHtml = comments.reverse().map(toHtml).join('');
-  return `<table>${commentsHtml}</table>`
+  return `<table class="comments">${commentsHtml}</table>`
 };
 
 const getOldComments = () => {

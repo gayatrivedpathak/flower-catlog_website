@@ -1,11 +1,11 @@
 # TODO
 
 - [ ] parse comment for the newline character
-- [ ] Change the date and time format of comments
-- [ ]
+- [ ] Add the styles to the comments table
 
 # DONE
 
+- [x] Change the date and time format of comments
 - [x] create guest book for taking comments
 - [x] Add the styles for the page
 - [x] Add download option for the flower documents

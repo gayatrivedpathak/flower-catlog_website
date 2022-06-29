@@ -22,28 +22,29 @@ const generateCommentsHtml = (comments) => {
   return `<table class="comments">${commentsHtml}</table>`
 };
 
-const getOldComments = () => {
-  const comments = fs.readFileSync('./comments.json', 'utf-8')
-  return comments.length ? JSON.parse(comments) : [];
-};
+const handleGuestBook = (request, response) => {
+  console.log(request.url.searchParams);
+  const { guestBook, url: { searchParams } } = request;
 
-const handleGuestBook = ({ queryParams }, response) => {
-  const { name, comment } = queryParams;
-  const rawTemplate = fs.readFileSync('./public/guest-book.html', 'utf-8');
-  const comments = getOldComments();
+  const name = searchParams.get('name');
+  const comment = searchParams.get('comment');
+
+  const rawTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
   if (name && comment) {
-    comments.push({ name, comment, date: timeStamp() });
-    fs.writeFileSync('./comments.json', JSON.stringify(comments));
+    guestBook.push({ name, comment, date: timeStamp() });
+    fs.writeFileSync('./resources/comments.json', JSON.stringify(guestBook));
   }
-  const commentsHtml = generateCommentsHtml(comments);
+
+  const commentsHtml = generateCommentsHtml(guestBook);
   const template = rawTemplate.replace('__COMMENTS__', commentsHtml);
-  response.send(template);
+  response.end(template);
   return true;
 };
 
-const guestBookHandler = (request, response) => {
-  const { uri } = request;
-  if (uri === '/guest-book') {
+const guestBookHandler = (guestBook) => (request, response) => {
+  const { url } = request;
+  if (url.pathname === '/guest-book' && request.method === 'GET') {
+    request.guestBook = guestBook;
     return handleGuestBook(request, response);
   }
 };

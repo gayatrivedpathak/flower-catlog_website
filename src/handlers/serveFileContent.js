@@ -12,13 +12,13 @@ const getMimeType = (extension) => {
   return mimeTypes[extension];
 };
 
-const createServeFileContent = (rootDir) => (request, response) => {
+const createServeFileContent = (serveFrom) => (request, response) => {
   let url = request.url.pathname;
   if (url === '/') {
     url = '/index.html';
   }
 
-  const fileName = path.join(rootDir, url);
+  const fileName = path.join(serveFrom, url);
   try {
     const fileContent = fs.readFileSync(fileName);
     const extension = path.extname(fileName);

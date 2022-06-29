@@ -1,21 +1,26 @@
+const fs = require('fs');
 const { createRouter } = require("./server/createRouter");
-const { guestBookHandler } = require('./handlers/guestBookHandler.js');
+const { createGuestBookHandler } = require('./handlers/guestBookHandler.js');
 const { notFoundHandler } = require('./handlers/notFoundHandler.js');
 const { createServeFileContent } = require('./handlers/serveFileContent.js');
-const fs = require('fs');
+const { parseUrlHandler } = require("./handlers/parseUrlHandler");
+const { waitForDebugger } = require('inspector');
 
-const existingGuestBook = () => {
-  const guestBook = fs.readFileSync('./resources/comments.json', 'utf-8')
+const loadGuestBook = (dataPath) => {
+  const guestBook = fs.readFileSync(dataPath, 'utf-8');
   return guestBook.length ? JSON.parse(guestBook) : [];
 };
 
-const app = () => {
+const app = ({ serveFrom, dataPath }) => {
   const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
-  const guestBook = existingGuestBook();
+  const guestBook = loadGuestBook(dataPath);
+  const guestBookHandler = createGuestBookHandler(guestBook, guestBookTemplate);
+  const serveFileContent = createServeFileContent(serveFrom);
 
   const router = createRouter(
-    createServeFileContent('./public'),
-    guestBookHandler(guestBook, guestBookTemplate),
+    parseUrlHandler,
+    serveFileContent,
+    guestBookHandler,
     notFoundHandler
   );
   return router;

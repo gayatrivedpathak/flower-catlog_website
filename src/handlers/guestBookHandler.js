@@ -55,7 +55,7 @@ const serveGuestBook = (request, response) => {
   return true;
 };
 
-const guestBookHandler = (guestBook, guestBookTemplate) =>
+const createGuestBookHandler = (guestBook, guestBookTemplate) =>
   (request, response) => {
     const { url } = request;
 
@@ -71,4 +71,4 @@ const guestBookHandler = (guestBook, guestBookTemplate) =>
     }
   };
 
-module.exports = { guestBookHandler };
+module.exports = { createGuestBookHandler };

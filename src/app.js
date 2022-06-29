@@ -4,17 +4,21 @@ const { notFoundHandler } = require('./handlers/notFoundHandler.js');
 const { createServeFileContent } = require('./handlers/serveFileContent.js');
 const fs = require('fs');
 
-const getOldComments = () => {
+const existingGuestBook = () => {
   const guestBook = fs.readFileSync('./resources/comments.json', 'utf-8')
   return guestBook.length ? JSON.parse(guestBook) : [];
 };
 
-const guestBook = getOldComments();
+const app = () => {
+  const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
+  const guestBook = existingGuestBook();
 
-const router = createRouter(
-  createServeFileContent('./public'),
-  guestBookHandler(guestBook),
-  notFoundHandler
-);
+  const router = createRouter(
+    createServeFileContent('./public'),
+    guestBookHandler(guestBook, guestBookTemplate),
+    notFoundHandler
+  );
+  return router;
+};
 
-exports.router = router;
+exports.app = app;

@@ -1,4 +1,4 @@
 const { startServer } = require("./src/server/server");
-const { router } = require("./src/app");
+const { app } = require("./src/app");
 
-startServer(4444, router);
+startServer(4444, app());

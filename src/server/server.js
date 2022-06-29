@@ -4,9 +4,10 @@ const { URL } = require('url');
 const startServer = (port, handler) => {
   const server = http.createServer((request, response) => {
     const { host } = request.headers;
-    console.log(request.url.searchParams);
 
     request.url = new URL(`http://${host}${request.url}`);
+    console.log(request.method, request.url.pathname);
+
     handler(request, response);
   });
 

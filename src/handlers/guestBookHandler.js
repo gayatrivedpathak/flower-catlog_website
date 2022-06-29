@@ -18,35 +18,57 @@ const generateCommentsHtml = (comments) => {
   if (!comments.length) {
     return '';
   }
-  const commentsHtml = comments.reverse().map(toHtml).join('');
+  const commentsHtml = comments.map(toHtml).join('');
   return `<table class="comments">${commentsHtml}</table>`
 };
 
-const handleGuestBook = (request, response) => {
-  console.log(request.url.searchParams);
-  const { guestBook, url: { searchParams } } = request;
-
+const updateGuestBook = (searchParams, guestBook) => {
   const name = searchParams.get('name');
   const comment = searchParams.get('comment');
-
-  const rawTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
   if (name && comment) {
-    guestBook.push({ name, comment, date: timeStamp() });
+    guestBook.unshift({ name, comment, date: timeStamp() });
     fs.writeFileSync('./resources/comments.json', JSON.stringify(guestBook));
   }
+};
 
-  const commentsHtml = generateCommentsHtml(guestBook);
-  const template = rawTemplate.replace('__COMMENTS__', commentsHtml);
-  response.end(template);
+const addComment = (request, response) => {
+  const { guestBook, url: { searchParams } } = request;
+  updateGuestBook(searchParams, guestBook);
+  response.statusCode = 301;
+  response.setHeader('location', '/guest-book');
+  response.end();
   return true;
 };
 
-const guestBookHandler = (guestBook) => (request, response) => {
-  const { url } = request;
-  if (url.pathname === '/guest-book' && request.method === 'GET') {
-    request.guestBook = guestBook;
-    return handleGuestBook(request, response);
-  }
+const createPage = (guestBook, template) => {
+  const commentsHtml = generateCommentsHtml(guestBook);
+  return template.replace('__COMMENTS__', commentsHtml);
 };
+
+const serveGuestBook = (request, response) => {
+  const { guestBook, template } = request;
+  const guestBookPage = createPage(guestBook, template);
+
+  response.setHeader('content-length', guestBookPage.length);
+  response.setHeader('content-type', 'text/html');
+  response.end(guestBookPage);
+  return true;
+};
+
+const guestBookHandler = (guestBook, guestBookTemplate) =>
+  (request, response) => {
+    const { url } = request;
+
+    if (url.pathname === '/guest-book' && request.method === 'GET') {
+      request.guestBook = guestBook;
+      request.template = guestBookTemplate;
+      return serveGuestBook(request, response);
+    }
+
+    if (url.pathname === '/add-comment' && request.method === 'GET') {
+      request.guestBook = guestBook;
+      return addComment(request, response);
+    }
+  };
 
 module.exports = { guestBookHandler };

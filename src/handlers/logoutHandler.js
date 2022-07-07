@@ -1,5 +1,6 @@
 const logoutHandler = (sessions) => (request, response, next) => {
   const { url: { pathname }, method } = request;
+
   if (pathname === '/logout' && method === 'GET') {
     request.session = {};
     delete sessions[request.session.sessionId];
@@ -9,7 +10,6 @@ const logoutHandler = (sessions) => (request, response, next) => {
     response.statusCode = 302;
     response.end();
   }
-
   next();
 };
 

@@ -7,34 +7,32 @@ const timeStamp = () => {
   return `${date} ${time}`;
 };
 
-const updateGuestBook = (bodyParams, guestBook) => {
-  const entries = bodyParams.entries();
-  const entry = {};
-  for (const [key, value] of entries) {
-    entry[key] = value;
-  }
+const updateGuestBook = (guestBook, username, comment) => {
+  const entry = { username, comment };
   entry.date = timeStamp();
   guestBook.update(entry);
   fs.writeFileSync('./resources/comments.json', guestBook.comments);
 };
 
 const addComment = (request, response) => {
-  const { guestBook, bodyParams } = request;
-  updateGuestBook(bodyParams, guestBook);
+  const { guestBook, bodyParams: { comment } } = request;
+  const username = request.session.username;
+  updateGuestBook(guestBook, username, comment);
   response.statusCode = 301;
   response.setHeader('location', '/guest-book');
   response.end();
   return true;
 };
 
-const createPage = (guestBook, template) => {
+const createPage = (guestBook, template, username) => {
   const commentsHtml = guestBook.toHtml();
-  return template.replace('__COMMENTS__', commentsHtml);
+  return template.replace('__COMMENTS__', commentsHtml).replace('__NAME__', username.toUpperCase());
 };
 
 const serveGuestBook = (request, response) => {
   const { guestBook, template } = request;
-  const guestBookPage = createPage(guestBook, template);
+  const username = request.session.username;
+  const guestBookPage = createPage(guestBook, template, username);
 
   response.setHeader('content-length', guestBookPage.length);
   response.setHeader('content-type', 'text/html');

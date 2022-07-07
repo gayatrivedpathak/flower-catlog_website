@@ -1,5 +1,5 @@
-const commentToHtml = ({ name, date, comment }) => {
-  const nameHtml = `<td>${name}</td>`;
+const commentToHtml = ({ username, date, comment }) => {
+  const nameHtml = `<td>${username}</td>`;
   const commentHtml = `<td>${comment}</td>`;
   const dateHtml = `<td>${date}</td>`;
   return `<tr>${dateHtml}${nameHtml}${commentHtml}</tr>`;

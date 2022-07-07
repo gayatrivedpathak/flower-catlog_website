@@ -11,6 +11,8 @@ const { injectSession } = require('./handlers/sessionHandler');
 const { loginHandler } = require('./handlers/loginHandler');
 const { injectCookies } = require('./handlers/injectCookies');
 const { logoutHandler } = require('./handlers/logoutHandler');
+const { signupHandler } = require('./handlers/signupHandler');
+
 
 const loadGuestBook = (dataPath) => {
   const guestBook = fs.readFileSync(dataPath, 'utf-8');
@@ -32,13 +34,19 @@ const app = ({ serveFrom, dataPath }) => {
 
   const sessions = {};
 
+  const users = [
+    { username: 'gayatri', password: '12345' },
+    { username: 'ram', password: 'ram' }
+  ];
+
   const router = createRouter(
     searchParamsParser,
     logRequest,
     bodyParamsParser,
     injectCookies,
     injectSession(sessions),
-    loginHandler(sessions),
+    loginHandler(sessions, users),
+    signupHandler(users),
     logoutHandler(sessions),
     apiHandler,
     serveFileContent,

@@ -11,6 +11,4 @@ const injectSession = (sessions) => (request, response, next) => {
 };
 
 
-module.exports = {
-  injectSession
-}
+module.exports = { injectSession };

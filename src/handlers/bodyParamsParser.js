@@ -6,7 +6,12 @@ const bodyParamsParser = (request, response, next) => {
 
   request.on('end', () => {
     const bodyParams = new URLSearchParams(data);
-    request.bodyParams = bodyParams;
+    const entries = bodyParams.entries();
+    const entry = {};
+    for (const [key, value] of entries) {
+      entry[key] = value;
+    }
+    request.bodyParams = entry;
     next();
   });
 };

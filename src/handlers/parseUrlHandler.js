@@ -1,6 +1,7 @@
-const parseUrlHandler = (request, response) => {
+const searchParamsParser = (request, response, next) => {
   const { host } = request.headers;
   request.url = new URL(`http://${host}${request.url}`);
-  return false;
+  next();
 };
-exports.parseUrlHandler = parseUrlHandler;
+
+exports.searchParamsParser = searchParamsParser;

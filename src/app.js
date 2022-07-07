@@ -3,8 +3,10 @@ const { createRouter } = require("./server/createRouter");
 const { createGuestBookHandler } = require('./handlers/guestBookHandler.js');
 const { notFoundHandler } = require('./handlers/notFoundHandler.js');
 const { createServeFileContent } = require('./handlers/serveFileContent.js');
-const { parseUrlHandler } = require("./handlers/parseUrlHandler");
-const { waitForDebugger } = require('inspector');
+const { searchParamsParser } = require("./handlers/parseUrlHandler");
+const { GuestBook } = require('./handlers/GuestBook');
+const { createApiHandler } = require("./handlers/createApiHandler");
+const { bodyParamsParser } = require("./handlers/bodyParamsParser");
 
 const loadGuestBook = (dataPath) => {
   const guestBook = fs.readFileSync(dataPath, 'utf-8');
@@ -13,13 +15,17 @@ const loadGuestBook = (dataPath) => {
 
 const app = ({ serveFrom, dataPath }) => {
   const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
-  const guestBook = loadGuestBook(dataPath);
+  const comments = loadGuestBook(dataPath);
+  const guestBook = new GuestBook(comments);
   const guestBookHandler = createGuestBookHandler(guestBook, guestBookTemplate);
+  const apiHandler = createApiHandler(guestBook);
   const serveFileContent = createServeFileContent(serveFrom);
 
   const router = createRouter(
-    parseUrlHandler,
+    searchParamsParser,
+    apiHandler,
     serveFileContent,
+    bodyParamsParser,
     guestBookHandler,
     notFoundHandler
   );

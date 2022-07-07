@@ -7,33 +7,20 @@ const timeStamp = () => {
   return `${date} ${time}`;
 };
 
-const toHtml = ({ name, comment, date }) => {
-  const nameHtml = `<td>${name}</td>`;
-  const commentHtml = `<td>${comment}</td>`;
-  const dateHtml = `<td>${date}</td>`;
-  return `<tr>${dateHtml}${nameHtml}${commentHtml}</tr>`;
-};
-
-const generateCommentsHtml = (comments) => {
-  if (!comments.length) {
-    return '';
+const updateGuestBook = (bodyParams, guestBook) => {
+  const entries = bodyParams.entries();
+  const entry = {};
+  for (const [key, value] of entries) {
+    entry[key] = value;
   }
-  const commentsHtml = comments.map(toHtml).join('');
-  return `<table class="comments">${commentsHtml}</table>`
-};
-
-const updateGuestBook = (searchParams, guestBook) => {
-  const name = searchParams.get('name');
-  const comment = searchParams.get('comment');
-  if (name && comment) {
-    guestBook.unshift({ name, comment, date: timeStamp() });
-    fs.writeFileSync('./resources/comments.json', JSON.stringify(guestBook));
-  }
+  entry.date = timeStamp();
+  guestBook.update(entry);
+  fs.writeFileSync('./resources/comments.json', guestBook.comments);
 };
 
 const addComment = (request, response) => {
-  const { guestBook, url: { searchParams } } = request;
-  updateGuestBook(searchParams, guestBook);
+  const { guestBook, bodyParams } = request;
+  updateGuestBook(bodyParams, guestBook);
   response.statusCode = 301;
   response.setHeader('location', '/guest-book');
   response.end();
@@ -41,7 +28,7 @@ const addComment = (request, response) => {
 };
 
 const createPage = (guestBook, template) => {
-  const commentsHtml = generateCommentsHtml(guestBook);
+  const commentsHtml = guestBook.toHtml();
   return template.replace('__COMMENTS__', commentsHtml);
 };
 
@@ -52,23 +39,25 @@ const serveGuestBook = (request, response) => {
   response.setHeader('content-length', guestBookPage.length);
   response.setHeader('content-type', 'text/html');
   response.end(guestBookPage);
-  return true;
 };
 
 const createGuestBookHandler = (guestBook, guestBookTemplate) =>
-  (request, response) => {
+  (request, response, next) => {
     const { url } = request;
 
     if (url.pathname === '/guest-book' && request.method === 'GET') {
       request.guestBook = guestBook;
       request.template = guestBookTemplate;
-      return serveGuestBook(request, response);
+      serveGuestBook(request, response);
+      return;
     }
 
-    if (url.pathname === '/add-comment' && request.method === 'GET') {
+    if (url.pathname === '/add-comment' && request.method === 'POST') {
       request.guestBook = guestBook;
-      return addComment(request, response);
+      addComment(request, response);
+      return;
     }
+    next();
   };
 
 module.exports = { createGuestBookHandler };

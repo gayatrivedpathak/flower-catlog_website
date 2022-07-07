@@ -12,22 +12,28 @@ const getMimeType = (extension) => {
   return mimeTypes[extension];
 };
 
-const createServeFileContent = (serveFrom) => (request, response) => {
-  let url = request.url.pathname;
+const filePath = (url, serveFrom) => {
   if (url === '/') {
     url = '/index.html';
   }
+  return path.join(serveFrom, url);
+};
 
-  const fileName = path.join(serveFrom, url);
-  try {
-    const fileContent = fs.readFileSync(fileName);
+const createServeFileContent = (serveFrom) => (request, response, next) => {
+  if (request.method !== 'GET') {
+    next();
+  }
+  const url = request.url.pathname;
+  const fileName = filePath(url, serveFrom);
+  fs.readFile(fileName, (err, fileContent) => {
+    if (err) {
+      next();
+      return;
+    }
     const extension = path.extname(fileName);
     response.setHeader('content-type', getMimeType(extension));
     response.end(fileContent);
-  } catch (err) {
-    return false;
-  }
-  return true;
+  });
 };
 
 module.exports = { createServeFileContent };

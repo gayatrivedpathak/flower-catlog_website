@@ -1,7 +1,7 @@
 # TODO
 
 - [ ] Add styles to the comments table 
-- [ ] 
+- [ ] Seperate the parseUrlHandler
 
 # DONE
 

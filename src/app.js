@@ -7,7 +7,9 @@ const { searchParamsParser } = require("./handlers/parseUrlHandler");
 const { GuestBook } = require('./handlers/GuestBook');
 const { createApiHandler } = require("./handlers/createApiHandler");
 const { bodyParamsParser } = require("./handlers/bodyParamsParser");
-const { injectCookies, injectSession, loginHandler } = require('./handlers/sessionHandler');
+const { injectSession } = require('./handlers/sessionHandler');
+const { loginHandler } = require('./handlers/loginHandler');
+const { injectCookies } = require('./handlers/injectCookies');
 
 const loadGuestBook = (dataPath) => {
   const guestBook = fs.readFileSync(dataPath, 'utf-8');

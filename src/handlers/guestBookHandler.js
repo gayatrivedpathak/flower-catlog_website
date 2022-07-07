@@ -45,6 +45,13 @@ const createGuestBookHandler = (guestBook, guestBookTemplate) =>
   (request, response, next) => {
     const { url } = request;
 
+    if (!request.session && (url.pathname === '/add-comment' || url.pathname === '/guest-book')) {
+      response.statusCode = 302;
+      response.setHeader('location', '/login');
+      response.end();
+      return;
+    }
+
     if (url.pathname === '/guest-book' && request.method === 'GET') {
       request.guestBook = guestBook;
       request.template = guestBookTemplate;

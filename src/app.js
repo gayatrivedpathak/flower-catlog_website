@@ -7,11 +7,17 @@ const { searchParamsParser } = require("./handlers/parseUrlHandler");
 const { GuestBook } = require('./handlers/GuestBook');
 const { createApiHandler } = require("./handlers/createApiHandler");
 const { bodyParamsParser } = require("./handlers/bodyParamsParser");
+const { injectCookies, injectSession, loginHandler } = require('./handlers/sessionHandler');
 
 const loadGuestBook = (dataPath) => {
   const guestBook = fs.readFileSync(dataPath, 'utf-8');
   return guestBook.length ? JSON.parse(guestBook) : [];
 };
+
+const logRequest = (request, response, next) => {
+  console.log(request.method, request.url.pathname);
+  next();
+}
 
 const app = ({ serveFrom, dataPath }) => {
   const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
@@ -21,11 +27,17 @@ const app = ({ serveFrom, dataPath }) => {
   const apiHandler = createApiHandler(guestBook);
   const serveFileContent = createServeFileContent(serveFrom);
 
+  const sessions = {};
+
   const router = createRouter(
     searchParamsParser,
+    logRequest,
+    bodyParamsParser,
+    injectCookies,
+    injectSession(sessions),
+    loginHandler(sessions),
     apiHandler,
     serveFileContent,
-    bodyParamsParser,
     guestBookHandler,
     notFoundHandler
   );

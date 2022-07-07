@@ -10,6 +10,7 @@ const { bodyParamsParser } = require("./handlers/bodyParamsParser");
 const { injectSession } = require('./handlers/sessionHandler');
 const { loginHandler } = require('./handlers/loginHandler');
 const { injectCookies } = require('./handlers/injectCookies');
+const { logoutHandler } = require('./handlers/logoutHandler');
 
 const loadGuestBook = (dataPath) => {
   const guestBook = fs.readFileSync(dataPath, 'utf-8');
@@ -19,7 +20,7 @@ const loadGuestBook = (dataPath) => {
 const logRequest = (request, response, next) => {
   console.log(request.method, request.url.pathname);
   next();
-}
+};
 
 const app = ({ serveFrom, dataPath }) => {
   const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
@@ -38,6 +39,7 @@ const app = ({ serveFrom, dataPath }) => {
     injectCookies,
     injectSession(sessions),
     loginHandler(sessions),
+    logoutHandler(sessions),
     apiHandler,
     serveFileContent,
     guestBookHandler,

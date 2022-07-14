@@ -1,8 +1,3 @@
-const createSession = (username, password) => {
-  const date = new Date();
-  return { sessionId: date.getTime(), username, password };
-};
-
 const loginTemplate = () => `<html>
 <head>
   <title>Login page</title>
@@ -32,6 +27,11 @@ const loginTemplate = () => `<html>
 </body>
 </html>`;
 
+const createSession = (username, password) => {
+  const date = new Date();
+  return { sessionId: date.getTime(), username, password };
+};
+
 const isValidUser = (users, username, password) => {
   return users.find((user) => {
     return user.username === username && password === user.password; ß
@@ -49,10 +49,12 @@ const loginHandler = (sessions, users) => (request, response, next) => {
       response.setHeader('set-cookie', `id=${session.sessionId}`);
       response.statusCode = 302;
       response.setHeader('location', '/guest-book');
-      response.end();
+      response.end('Redirecting to /guest-book');
       return;
     }
+
     const template = loginTemplate().replace('__MSG__', 'Enter valid username and password');
+    response.statusCode = 401;
     response.setHeader('content-type', 'text/html');
     response.end(template);
     return;

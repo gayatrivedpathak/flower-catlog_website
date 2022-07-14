@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "repository": {
     "type": "git",
@@ -17,5 +17,11 @@
   "bugs": {
     "url": "https://github.com/gayatrivedpathak/flower-catlog_website/issues"
   },
-  "homepage": "https://github.com/gayatrivedpathak/flower-catlog_website#readme"
+  "homepage": "https://github.com/gayatrivedpathak/flower-catlog_website#readme",
+  "devDependencies": {
+    "supertest": "^6.2.4"
+  },
+  "dependencies": {
+    "express": "^4.18.1"
+  }
 }

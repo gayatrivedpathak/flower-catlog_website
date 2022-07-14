@@ -1,10 +1,11 @@
 # TODO
-
-- [ ] Add styles to the comments table 
-- [ ] Seperate the parseUrlHandler
+- [ ] Check for the suitable status code 
+- [ ] Extract the function for the get and post comment
 
 # DONE
 
+- [x] Add styles to the comments table 
+- [x] Seperate the parseUrlHandler
 - [x] seperated domain concern from the server
 - [x] Add notFound handler
 - [x] parse comment for the newline character

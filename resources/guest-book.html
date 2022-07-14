@@ -2,6 +2,7 @@
 
 <head>
   <title>Guest Book</title>
+  <script src="guest-book.js"></script>
   <link rel="stylesheet" href="css/style.css ">
 </head>
 
@@ -15,8 +16,8 @@
         </a>
   </header>
   <main class="content-area">
-    <form action="/add-comment" method="post" class="guest-book">
-      <div>
+    <form action="/add-comment" method="post" class="guest-book" id="guest-book">
+      <div id="username">
         <!-- <label for="name">Name:</label>
         <input type="text" name="name"> -->
         Name : __NAME__
@@ -25,10 +26,13 @@
         <label for="comment">Comment:</label>
         <textarea name="comment"></textarea>
       </div>
-      <input type="submit" value="submit">
+      <!-- <input type="submit" value="submit"> -->
+      <button id="submit">sumbit</button>
     </form>
   </main>
-  __COMMENTS__
+  <table id="comments" class="comments">
+    __COMMENTS__
+  </table>
 </body>
 
 </html>

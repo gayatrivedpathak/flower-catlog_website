@@ -7,7 +7,8 @@ const getMimeType = (extension) => {
     '.jpg': 'image/jpeg',
     '.gif': 'image/gif',
     '.css': 'text/css',
-    '.pdf': 'application/pdf'
+    '.pdf': 'application/pdf',
+    '.js': 'text/javascript'
   };
   return mimeTypes[extension];
 };

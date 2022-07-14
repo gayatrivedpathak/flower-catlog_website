@@ -12,21 +12,41 @@ const updateGuestBook = (guestBook, username, comment) => {
   entry.date = timeStamp();
   guestBook.update(entry);
   fs.writeFileSync('./resources/comments.json', guestBook.comments);
+  return entry;
 };
+
+// const addComment = (request, response) => {
+//   const { guestBook, bodyParams: { comment } } = request;
+//   const username = request.session.username;
+//   updateGuestBook(guestBook, username, comment);
+//   response.statusCode = 301;
+//   response.setHeader('location', '/guest-book');
+//   response.end();
+//   return true;
+// };
 
 const addComment = (request, response) => {
   const { guestBook, bodyParams: { comment } } = request;
+
+  if (!comment) {
+    response.statusCode = 400;
+    response.end();
+    return;
+  }
+
   const username = request.session.username;
-  updateGuestBook(guestBook, username, comment);
-  response.statusCode = 301;
-  response.setHeader('location', '/guest-book');
-  response.end();
-  return true;
+  const entry = updateGuestBook(guestBook, username, comment);
+  response.statusCode = 201;
+  response.setHeader('content-type', 'text/plain');
+  response.end('Comment saved');
+  return;
 };
 
 const createPage = (guestBook, template, username) => {
   const commentsHtml = guestBook.toHtml();
-  return template.replace('__COMMENTS__', commentsHtml).replace('__NAME__', username.toUpperCase());
+  return template
+    .replace('__COMMENTS__', commentsHtml)
+    .replace('__NAME__', username.toUpperCase());
 };
 
 const serveGuestBook = (request, response) => {
@@ -46,7 +66,7 @@ const createGuestBookHandler = (guestBook, guestBookTemplate) =>
     if (!request.session && (url.pathname === '/add-comment' || url.pathname === '/guest-book')) {
       response.statusCode = 302;
       response.setHeader('location', '/login');
-      response.end();
+      response.end('Redirected to the /login');
       return;
     }
 

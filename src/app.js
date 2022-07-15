@@ -1,52 +1,50 @@
 const fs = require('fs');
+const express = require('express');
 
-const { createRouter } = require("./server/createRouter");
-const { createGuestBookHandler } = require('./handlers/guestBookHandler.js');
-const { notFoundHandler } = require('./handlers/notFoundHandler.js');
-const { createServeFileContent } = require('./handlers/serveFileContent.js');
-const { searchParamsParser } = require("./handlers/parseUrlHandler");
-const { GuestBook } = require('./handlers/GuestBook');
-const { createApiHandler } = require("./handlers/createApiHandler");
-const { bodyParamsParser } = require("./handlers/bodyParamsParser");
+const { createGuestBookRouter } = require('./handlers/guestBookHandler.js');
+// const { GuestBook } = require('./handlers/GuestBook');
 const { injectSession } = require('./handlers/sessionHandler');
-const { loginHandler } = require('./handlers/loginHandler');
+const { loginUser, serveLoginPage } = require('./handlers/loginHandler');
 const { injectCookies } = require('./handlers/injectCookies');
 const { logoutHandler } = require('./handlers/logoutHandler');
-const { signupHandler } = require('./handlers/signupHandler');
+const { signupUser, serveSignupPage } = require('./handlers/signupHandler');
 
-const loadGuestBook = (dataPath) => {
-  const guestBook = fs.readFileSync(dataPath, 'utf-8');
-  return guestBook.length ? JSON.parse(guestBook) : [];
-};
+
 
 const logRequest = (request, response, next) => {
-  console.log(request.method, request.url.pathname);
+  console.log(request.method, request.url);
   next();
 };
 
-const app = (config, users, sessions) => {
-  const guestBookTemplate = fs.readFileSync('./resources/guest-book.html', 'utf-8');
-  const comments = loadGuestBook(config.dataPath);
-  const guestBook = new GuestBook(comments);
-  const guestBookHandler = createGuestBookHandler(guestBook, guestBookTemplate);
-  const apiHandler = createApiHandler(guestBook);
-  const serveFileContent = createServeFileContent(config.serveFrom);
+const createApp = (config, users, sessions) => {
+  const { guestBookTemplatePath, dataPath, serveFrom } = config;
+  const app = express();
 
-  const router = createRouter(
-    searchParamsParser,
-    // logRequest,
-    bodyParamsParser,
-    injectCookies,
-    injectSession(sessions),
-    loginHandler(sessions, users),
-    signupHandler(users),
-    logoutHandler(sessions),
-    apiHandler,
-    serveFileContent,
-    guestBookHandler,
-    notFoundHandler
-  );
-  return router;
+  const guestBookRouter = createGuestBookRouter(dataPath, guestBookTemplatePath);
+
+  app.use(logRequest);
+  app.use(express.urlencoded({ extended: true }));
+  app.use(injectCookies);
+  app.use(injectSession(sessions));
+
+  app.use(express.static(serveFrom));
+
+  app.use('/guest-book', guestBookRouter);
+
+  const loginRouter = express.Router();
+  loginRouter.get('/', serveLoginPage);
+  loginRouter.post('/', loginUser(sessions, users));
+
+  app.use('/login', loginRouter);
+
+  const signupRouter = express.Router();
+  signupRouter.get('/', serveSignupPage);
+  signupRouter.post('/', signupUser(users));
+
+  app.use('/signup', signupRouter);
+  app.get('/logout', logoutHandler(sessions));
+
+  return app;
 };
 
-exports.app = app;
+exports.createApp = createApp;

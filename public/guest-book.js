@@ -34,7 +34,7 @@ const updatePage = (xhr) => {
 
 const getComments = () => {
   const xhr = new XMLHttpRequest();
-  xhr.open('GET', '/api');
+  xhr.open('GET', '/guest-book/api');
   xhr.send();
   xhr.onload = () => {
     updatePage(xhr);
@@ -45,7 +45,7 @@ const postComment = () => {
   const body = createBody();
 
   const xhr = new XMLHttpRequest();
-  xhr.open('POST', '/add-comment');
+  xhr.open('POST', '/guest-book/add-comment');
   xhr.send(body);
   xhr.onload = () => {
     if (xhr.status === 201) {

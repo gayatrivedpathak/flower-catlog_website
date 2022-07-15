@@ -24,7 +24,6 @@ class GuestBook {
       return '';
     }
     const commentsHtml = this.#comments.map(commentToHtml);
-    // return `<table class = "comments">${commentsHtml.join('')}</table>`;
     return commentsHtml.join('');
   }
 };

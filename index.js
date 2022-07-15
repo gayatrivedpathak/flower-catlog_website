@@ -1,9 +1,9 @@
-const { startServer } = require("./src/server/server");
-const { app } = require("./src/app");
+const { createApp } = require("./src/app");
 
 const config = {
-  serveFrom: './public',
-  dataPath: './data/comments.json',
+  serveFrom: 'public',
+  dataPath: 'data/comments.json',
+  guestBookTemplatePath: 'resources/guest-book.html'
 };
 
 const sessions = {};
@@ -12,4 +12,5 @@ const users = [
   { username: 'ram', password: 'ram' }
 ];
 
-startServer(4444, app(config, users, sessions));
+const app = createApp(config, users, sessions);
+app.listen(4444, () => console.log('Listening on 4444'));

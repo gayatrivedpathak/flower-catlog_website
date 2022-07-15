@@ -1,4 +1,6 @@
 const fs = require('fs');
+const express = require('express');
+const { GuestBook } = require('./GuestBook');
 
 const timeStamp = () => {
   const d = new Date();
@@ -11,34 +13,22 @@ const updateGuestBook = (guestBook, username, comment) => {
   const entry = { username, comment };
   entry.date = timeStamp();
   guestBook.update(entry);
-  fs.writeFileSync('./resources/comments.json', guestBook.comments);
+  fs.writeFileSync('./data/comments.json', guestBook.comments);
   return entry;
 };
 
-// const addComment = (request, response) => {
-//   const { guestBook, bodyParams: { comment } } = request;
-//   const username = request.session.username;
-//   updateGuestBook(guestBook, username, comment);
-//   response.statusCode = 301;
-//   response.setHeader('location', '/guest-book');
-//   response.end();
-//   return true;
-// };
-
 const addComment = (request, response) => {
-  const { guestBook, bodyParams: { comment } } = request;
+  const { guestBook, body: { comment } } = request;
 
   if (!comment) {
-    response.statusCode = 400;
-    response.end();
+    response.status(400).end();
     return;
   }
 
   const username = request.session.username;
   const entry = updateGuestBook(guestBook, username, comment);
-  response.statusCode = 201;
   response.setHeader('content-type', 'text/plain');
-  response.end('Comment saved');
+  response.status(201).end('Comment saved');
   return;
 };
 
@@ -50,39 +40,58 @@ const createPage = (guestBook, template, username) => {
 };
 
 const serveGuestBook = (request, response) => {
-  const { guestBook, template } = request;
-  const username = request.session.username;
+  const { template, guestBook, session } = request;
+
+  const username = session.username;
   const guestBookPage = createPage(guestBook, template, username);
 
   response.setHeader('content-length', guestBookPage.length);
   response.setHeader('content-type', 'text/html');
+
   response.end(guestBookPage);
 };
 
-const createGuestBookHandler = (guestBook, guestBookTemplate) =>
-  (request, response, next) => {
-    const { url } = request;
+const hasLoggedIn = (request, response, next) => {
+  if (!request.session) {
+    response.redirect('/login');
+    response.status(302).end();
+    return;
+  }
+  next();
+};
 
-    if (!request.session && (url.pathname === '/add-comment' || url.pathname === '/guest-book')) {
-      response.statusCode = 302;
-      response.setHeader('location', '/login');
-      response.end('Redirected to the /login');
-      return;
-    }
+const serveCommentsApi = (request, response) => {
+  const api = request.guestBook.comments;
+  response.setHeader('content-type', 'application/json');
+  response.setHeader('content-length', api.length);
+  response.end(api);
+  return;
+};
 
-    if (url.pathname === '/guest-book' && request.method === 'GET') {
-      request.guestBook = guestBook;
-      request.template = guestBookTemplate;
-      serveGuestBook(request, response);
-      return;
-    }
+const readText = (filePath) => fs.readFileSync(filePath, 'utf8');
 
-    if (url.pathname === '/add-comment' && request.method === 'POST') {
-      request.guestBook = guestBook;
-      addComment(request, response);
-      return;
-    }
+const loadGuestBook = (dataPath) => {
+  const guestBook = fs.readFileSync(dataPath, 'utf-8');
+  return guestBook.length ? JSON.parse(guestBook) : [];
+};
+
+const createGuestBookRouter = (dataPath, guestBookTemplatePath) => {
+  const template = readText(guestBookTemplatePath);
+  const comments = loadGuestBook(dataPath);
+  const guestBook = new GuestBook(comments);
+
+  const guestBookRouter = express.Router();
+  guestBookRouter.use((request, response, next) => {
+    request.guestBook = guestBook;
+    request.template = template;
     next();
-  };
+  });
 
-module.exports = { createGuestBookHandler };
+  guestBookRouter.get('/', hasLoggedIn, serveGuestBook);
+  guestBookRouter.post('/add-comment', addComment);
+  guestBookRouter.get('/api', serveCommentsApi);
+
+  return guestBookRouter;
+};
+
+module.exports = { createGuestBookRouter };

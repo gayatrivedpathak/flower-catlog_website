@@ -1,18 +1,19 @@
 const request = require('supertest');
-const { app } = require('../src/app');
+const { createApp } = require('../src/app');
 
 const config = {
   serveFrom: './public',
-  dataPath: './test/testData.json'
+  dataPath: './test/testData.json',
+  guestBookTemplatePath: 'resources/guest-book.html'
 };
 
 describe('GET /wrongUrl', () => {
   it('Should give the 404 for wrong url', (done) => {
     const sessions = {};
     const users = [];
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/wrongUrl')
-      .expect('Not Found')
+      .expect(/html/)
       .expect(404, done);
   });
 });
@@ -21,9 +22,9 @@ describe('GET /', () => {
   it('Should serve index.html from public directory', (done) => {
     const sessions = {};
     const users = [];
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/')
-      .expect('Content-type', 'text/html')
+      .expect('Content-type', 'text/html; charset=UTF-8')
       .expect(/html/)
       .expect(200, done);
   });
@@ -33,10 +34,9 @@ describe('GET /guest-book', () => {
   it('Should redirect to the login page if cookie is not set', (done) => {
     const sessions = {};
     const users = [];
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/guest-book')
       .expect('location', '/login')
-      .expect('Redirected to the /login')
       .expect(302, done);
   });
 
@@ -48,7 +48,7 @@ describe('GET /guest-book', () => {
       { username: 'gayatri', password: '123' }
     ];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/guest-book')
       .set('cookie', 'id=123')
       .expect('Content-type', 'text/html')
@@ -57,7 +57,7 @@ describe('GET /guest-book', () => {
   });
 });
 
-describe('POST /add-comment', () => {
+describe('POST /guest-book/add-comment', () => {
   let myApp;
 
   beforeEach(() => {
@@ -67,12 +67,12 @@ describe('POST /add-comment', () => {
     const users = [
       { username: 'gayatri', password: '123' }
     ];
-    myApp = app(config, users, sessions);
+    myApp = createApp(config, users, sessions);
   });
 
   it('Should add comment and give 201 status code', (done) => {
     request(myApp)
-      .post('/add-comment')
+      .post('/guest-book/add-comment')
       .set('cookie', 'id=123')
       .send('comment=hello')
       .expect('Content-type', 'text/plain')
@@ -82,7 +82,7 @@ describe('POST /add-comment', () => {
 
   it('Should get 400 status code if comment is empty', (done) => {
     request(myApp)
-      .post('/add-comment')
+      .post('/guest-book/add-comment')
       .set('cookie', 'id=123')
       .send('comment=')
       .expect(400, done);
@@ -98,7 +98,7 @@ describe('POST /login', () => {
     const users = [
       { username: 'gayatri', password: 'a' }
     ];
-    myApp = app(config, users, sessions);
+    myApp = createApp(config, users, sessions);
   });
 
   it('Should redirect to the guest-book for successful login', (done) => {
@@ -123,7 +123,7 @@ describe('GET /login', () => {
     const sessions = {};
     const users = [];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/login')
       .expect('content-type', 'text/html')
       .expect(200, done);
@@ -135,7 +135,7 @@ describe('GET /signup', () => {
     const sessions = {};
     const users = [];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/signup')
       .expect('content-type', 'text/html')
       .expect(200, done);
@@ -147,7 +147,7 @@ describe('POST /signup', () => {
     const sessions = {};
     const users = [];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .post('/signup')
       .send('username=sham&password=123')
       .expect(200, done);
@@ -157,7 +157,7 @@ describe('POST /signup', () => {
     const sessions = {};
     const users = [{ username: 'sham', password: '123' }];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .post('/signup')
       .send('username=sham&password=123')
       .expect(409, done);
@@ -169,8 +169,9 @@ describe('GET /logout', () => {
     const sessions = {};
     const users = [{ username: 'sham', password: '123' }];
 
-    request(app(config, users, sessions))
+    request(createApp(config, users, sessions))
       .get('/logout')
+      .set('cookie', 'id=123')
       .expect('location', '/')
       .expect(302, done);
   });

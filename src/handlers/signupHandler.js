@@ -31,30 +31,22 @@ const isExistingUser = (users, newUsername) => {
   return users.find(({ username }) => username === newUsername);
 };
 
-const signupHandler = (users) => (request, response, next) => {
-  const {
-    url: { pathname },
-    method, bodyParams: { username, password }
-  } = request;
-
-  if (method === 'GET' && pathname === '/signup') {
-    response.setHeader('content-type', 'text/html');
-    response.end(signupPageTemplate());
-    return;
-  }
-
-  if (method === 'POST' && pathname === '/signup') {
-    if (isExistingUser(users, username)) {
-      response.statusCode = 409;
-      response.end('User already exist');
-      return;
-    }
-
-    users.push({ username, password });
-    response.end('Successful');
-    return;
-  }
-  next();
+const serveSignupPage = (request, response) => {
+  response.setHeader('content-type', 'text/html');
+  response.end(signupPageTemplate());
+  return;
 };
 
-module.exports = { signupHandler };
+const signupUser = (users) => (request, response) => {
+  const { body: { username, password } } = request;
+
+  if (isExistingUser(users, username)) {
+    response.status(409).end('User already exist');
+    return;
+  }
+
+  users.push({ username, password });
+  response.end('Successful');
+};
+
+module.exports = { signupUser, serveSignupPage };

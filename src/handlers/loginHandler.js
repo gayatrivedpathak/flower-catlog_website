@@ -38,35 +38,29 @@ const isValidUser = (users, username, password) => {
   });
 };
 
-const loginHandler = (sessions, users) => (request, response, next) => {
-  const { method, url: { pathname }, bodyParams: { username, password } } = request;
+const loginUser = (sessions, users) => (request, response) => {
+  const { body: { username, password } } = request;
 
-  if (pathname === '/login' && method === 'POST') {
-    const session = createSession(username, password);
-    sessions[session.sessionId] = session;
+  const session = createSession(username, password);
+  sessions[session.sessionId] = session;
 
-    if (isValidUser(users, username, password)) {
-      response.setHeader('set-cookie', `id=${session.sessionId}`);
-      response.statusCode = 302;
-      response.setHeader('location', '/guest-book');
-      response.end('Redirecting to /guest-book');
-      return;
-    }
-
-    const template = loginTemplate().replace('__MSG__', 'Enter valid username and password');
-    response.statusCode = 401;
-    response.setHeader('content-type', 'text/html');
-    response.end(template);
+  if (isValidUser(users, username, password)) {
+    response.cookie(`id=${session.sessionId}`);
+    response.location('/guest-book');
+    response.status(302).end('Redirecting to /guest-book');
     return;
   }
 
-  if (pathname === '/login' && method === 'GET') {
-    const template = loginTemplate().replace('__MSG__', '');
-    response.setHeader('content-type', 'text/html');
-    response.end(template);
-    return;
-  }
-  next();
+  const template = loginTemplate().replace('__MSG__', 'Enter valid username and password');
+  response.setHeader('content-type', 'text/html');
+  response.status(401).end(template);
 };
 
-module.exports = { loginHandler };
+const serveLoginPage = (request, response) => {
+  const template = loginTemplate().replace('__MSG__', '');
+  response.setHeader('content-type', 'text/html');
+  response.end(template);
+  return;
+};
+
+module.exports = { loginUser, serveLoginPage };
